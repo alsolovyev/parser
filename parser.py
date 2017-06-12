@@ -62,7 +62,7 @@ def get_pages_number(html):
 			html = r.text
 			soup = BeautifulSoup(html, 'lxml')
 
-			
+
 		div = soup.find('div', id='content')
 		ls = div.find_all('li')[-1].find('a').get('href').split('page=')
 		pages = int(ls[1])
@@ -94,12 +94,12 @@ def get_all_products(url, pages):
 			html = r.text
 			soup = BeautifulSoup(html, 'lxml')
 
-			
+
 		div = soup.find_all('div', class_='tm-product-container')
 		for item in div:
 			headers = item.find_all('div', class_='tm-product-name-container')
 			for head in headers:
-				i = i + 1 
+				i = i + 1
 				link = head.find('a').get('href')
 				products.append(link)
 
@@ -108,7 +108,7 @@ def get_all_products(url, pages):
 
 
 	# "for i in range(1, total_pages):"
-	# # 
+	# #
 def get_data(html, count):
 	while(True):
 		try:
@@ -123,7 +123,7 @@ def get_data(html, count):
 	try:
 		manufacturer = soup.find('a', class_='manufacturer').text.replace('\n', '').strip()
 	except:
-		manufacturer = ''		
+		manufacturer = ''
 
 	#******************categories***********************
 	ul = soup.find('ul', class_='breadcrumb')
@@ -161,9 +161,9 @@ def get_data(html, count):
 	#******************available**********************
 	available = soup.find('div', class_='tm-product-stock-container').find('span').get('class')
 	if (available[0] == 'goods-available'):
-		available = '+'
+		available = '1'
 	else:
-		available = '-'
+		available = '0'
 	#******************article**********************
 	article = soup.find('div', class_='tm-model-container').getText().strip().split(' ')
 
@@ -174,10 +174,33 @@ def get_data(html, count):
 	#available in shop
 	a = '+'
 
-	# print(cat)
-	# print(cat1)
-	# print(cat2)
-	# print(cat3)
+	#empty cells
+	cat4 = ''
+	additional = ''
+	short_description = ''
+	discount = ''
+	discount_date = ''
+	weight = ''
+	width = ''
+	height = ''
+	length = ''
+	code = ''
+	additional_characteristics = ''
+	comments = ''
+	delivery_date = ''
+	sh_goods = ''
+	tag = ''
+	related_products = ''
+	option_weight = ''
+	option_color = ''
+	tag_title = ''
+	tag_h1 = ''
+	meta_description = ''
+	meta_keywords = ''
+	# print(cat) Категория
+	# print(cat1) Подкатегория 1
+	# print(cat2) Подкатегория 2
+	# print(cat3) Дополнительные категории
 	# print('*************')
 	# print(article[1])
 	# print('*************')
@@ -191,17 +214,48 @@ def get_data(html, count):
 	print('       ' + bcolors.WARNING + str(count) + bcolors.ENDC + '. ' + name)
 	with open('products.csv', 'a') as file:
 		writer = csv.writer(file)
-		writer.writerow((cat, cat1, cat2, cat3, name, a, description, price[0], manufacturer, img, article[1], available))
-	
+		writer.writerow((cat,
+                                        cat1,
+                                        cat2,
+                                        cat3,
+                                        cat4,
+                                        additional,
+                                        name,
+                                        a,
+                                        short_description,
+                                        description,
+                                        price[0],
+                                        discount,
+                                        discount_date,
+                                        weight,
+                                        width,
+                                        height,
+                                        length,
+                                        manufacturer,
+                                        img,
+                                        article[1],
+                                        code,
+                                        additional_characteristics,
+                                        available,
+                                        comments,
+                                        delivery_date,
+                                        sh_goods,
+                                        tag,
+                                        related_products,
+                                        option_weight,
+                                        option_color,
+                                        tag_title,
+                                        tag_h1,
+                                        meta_description,
+                                        meta_keywords))
+
 	# sleep(uniform(1, 2))
 
 
 def main():
 	with open('products.csv', 'w') as file:
 		writer = csv.writer(file)
-										# writer.writerow((cat, cat1, cat2, cat3, name, a, description, price[0], manufacturer, img, article[1], available))
-		writer.writerow(('Категория', 'Подкатегория 1', 'Подкатегория 2', 'Дополнительные категории', 'Наименование', 'Отображать в моем магазине', 'Описание', 'Цена, р.', 'Производитель', 'Фотографии', 'Код продавца товара', 'Остаток'))
-	#error counter
+		writer.writerow(('Категория', 'Подкатегория 1', 'Подкатегория 2', 'Подкатегория 3', 'Подкатегория 4', 'Дополнительные категории', 'Наименование', 'Отображать в моем магазине', 'Короткое описание', 'Описание', 'Цена, р.', 'Цена со скидкой, р.', 'Скидка до, дд.мм.гггг', 'Вес, кг', 'Ширина, см', 'Высота, см', 'Длинна, см', 'Производитель', 'Фотографии', 'Код продавца товара', 'Код производителя', 'Дополнительные характеристики', 'Остаток', 'Комметарий к доставке', 'Обычный срок поставки', 'Подержанный товар', 'Тэги', 'Товары-аналоги', 'Сопутствующие товары', 'Параметры:Размер', 'Парметры:Цвет', 'Тег Title', 'Тег H1', 'Метатег Description', 'Метатег Keywords'))
 	pr = 0
 	er = 0
 	#получаем страницу компании(список)
@@ -240,7 +294,6 @@ def main():
 		# with open('items.txt', 'a') as file:
 		# 	for item in list_of_products:
 		# 		file.write(item + '\n')
-
 	print('')
 	print('*****************************')
 	print('            DONE')
