@@ -2,11 +2,11 @@
 
 Most Terrrrrrrrrible Python Parser!
 
-## Don't use it! YOU HERE ME!?
+## Don't use it! YOU HEAR ME!?
 
 Requirements:
-* **pip** apt-get install python3-pip
-* **bs4**  pip install beautifulsoup4 (python3 - pip3)
+* **pip**
+* **bs4**
 * **csv**
 * **time**
 * **requests**
