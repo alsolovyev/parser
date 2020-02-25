@@ -2,7 +2,7 @@
 
 Technomarin scraper is a script written in Python that scrapes and saves information about manufacturers and their goods from [https://technomarin.ru](https://technomarin.ru).
 
-![Instagram scraper](https://capella.pics/ba863875-3596-4f4f-9563-43c2e3ab4fb6.jpg)
+![Instagram scraper](https://habrastorage.org/webt/y8/ss/2y/y8ss2yuzneqlvujh0pryb85gdgu.jpeg)
 
 ## Requirements
 * python 3.x
