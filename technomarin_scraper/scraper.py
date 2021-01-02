@@ -24,7 +24,10 @@ class TechnomarinScraper():
     def __init__(self):
         """ Scraper initializations"""
         # logger.info('Init SCR')
-        pass
+        try:
+            logger.info('Last update on {}'.format(self.__readFile__(OUTPUT_REPORT).get('lastUpdate', '')))
+        except FileNotFoundError:
+            logger.info('No previous updates found')
 
     def __writeFile__(self, file, data):
         """ Write data to a file """
