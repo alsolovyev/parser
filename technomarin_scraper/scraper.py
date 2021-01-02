@@ -91,10 +91,10 @@ class TechnomarinScraper():
             manufacturers = self.getManufacturers()
 
         logger.info('Getting goods')
-        goods         = {}
-        numberOfGoods = 0
-        numberOfManuf = len(manufacturers.keys())
-        current_manuf = 0
+        goods           = {}
+        number_of_goods = 0
+        number_of_manuf = len(manufacturers.keys())
+        current_manuf   = 0
 
         # Parse information
         for name, url in manufacturers.items():
@@ -102,7 +102,7 @@ class TechnomarinScraper():
             current_page   = 0
             goods[name]    = []
 
-            progress_bar(numberOfManuf, current_manuf)
+            progress_bar(number_of_manuf, current_manuf)
 
             while True:
                 current_page += 1
@@ -112,22 +112,22 @@ class TechnomarinScraper():
                 if len(products) == 0: break
 
                 for product in products:
-                    numberOfGoods += 1
+                    number_of_goods += 1
                     goods[name].append(self.__getProductInfo__(product))
 
         sys.stdout.write('\n')
-        logger.info('{} entries were received'.format(numberOfGoods))
+        logger.info('{} entries were received'.format(number_of_goods))
         self.__writeFile__(OUTPUT_GOODS, goods)
-        self.report(numberOfManuf, numberOfGoods)
+        self.report(number_of_manuf, number_of_goods)
         return goods
 
     @logging_decorator
-    def report(self, numberOfManuf=None, numberOfGoods=None):
+    def report(self, number_of_manuf=None, number_of_goods=None):
         """ Write general information on manufacturers and their products """
         logger.info('Creating report')
         report = {
-            'numberOfManufacturers': numberOfManuf,
-            'numberOfGoods':         numberOfGoods,
+            'number_of_manufacturers': number_of_manuf,
+            'number_of_goods':         number_of_goods,
             'lastUpdate':            datetime.now().strftime('%d-%m-%Y %H:%M:%S')
         }
         self.__writeFile__(OUTPUT_REPORT, report)
