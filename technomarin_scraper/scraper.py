@@ -52,6 +52,18 @@ class TechnomarinScraper():
             logger.exception('¯\\_(ツ)_/¯')
             sys.exit(1)
 
+    def __getProductInfo__(self, product_page):
+        """ Return information from the product page """
+        title = product_page.xpath('.//div[@class="tm-product-name-container"]/a')[0]
+        return {
+            'code':     product_page.xpath('.//div[@class="tm-product-description-container"]//p/text()')[0].split(': ')[1],
+            'name':     title.get('title'),
+            'url':      title.get('href'),
+            'image':    product_page.xpath('.//div[@class="img-container"]/img[1]/@src')[0],
+            'price':    float(re.sub('[^0-9]', '', product_page.xpath('.//span[contains(@class, "general-price")]/text()')[0])) / 100,
+            'in_stock': True if len(product_page.xpath('.//span[@class="goods-available"]')) > 0 else False
+        }
+
     @logging_decorator
     def getManufacturers(self):
         """ Get a list of all manufacturers and save it """
@@ -98,20 +110,10 @@ class TechnomarinScraper():
                 products = DOM.xpath('//div[contains(@class, "tm-product-container")]')
 
                 if len(products) == 0: break
-                for p in products:
+
+                for product in products:
                     numberOfGoods += 1
-                    title = p.xpath('.//div[@class="tm-product-name-container"]/a')[0]
-                    product = {
-                        'code':     p.xpath('.//div[@class="tm-product-description-container"]//p/text()')[0].split(': ')[1],
-                        'name':     title.get('title'),
-                        'url':      title.get('href'),
-                        'image':    p.xpath('.//div[@class="img-container"]/img[1]/@src')[0],
-                        'price':    float(re.sub('[^0-9]', '', p.xpath('.//span[contains(@class, "general-price")]/text()')[0])) / 100,
-                        'in_stock': True if len(p.xpath('.//span[@class="goods-available"]')) > 0 else False
-                    }
-
-                    goods[name].append(product)
-
+                    goods[name].append(self.__getProductInfo__(product))
 
         sys.stdout.write('\n')
         logger.info('{} entries were received'.format(numberOfGoods))
