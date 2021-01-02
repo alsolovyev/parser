@@ -3,6 +3,7 @@
 
 import sys
 import json
+import re
 from datetime       import datetime
 from lxml           import html
 from .constants     import URL_MANUF, OUTPUT_MANUF, OUTPUT_GOODS, OUTPUT_REPORT
@@ -105,7 +106,7 @@ class TechnomarinScraper():
                         'name':     title.get('title'),
                         'url':      title.get('href'),
                         'image':    p.xpath('.//div[@class="img-container"]/img[1]/@src')[0],
-                        'price':    float(p.xpath('.//span[contains(@class, "general-price")]/text()')[0].strip().split(' ')[0]),
+                        'price':    float(re.sub('[^0-9]', '', p.xpath('.//span[contains(@class, "general-price")]/text()')[0])) / 100,
                         'in_stock': True if len(p.xpath('.//span[@class="goods-available"]')) > 0 else False
                     }
 
