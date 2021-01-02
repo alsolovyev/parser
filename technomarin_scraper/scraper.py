@@ -3,6 +3,7 @@
 
 import sys
 import json
+import re
 from datetime       import datetime
 from lxml           import html
 from .constants     import URL_MANUF, OUTPUT_MANUF, OUTPUT_GOODS, OUTPUT_REPORT
@@ -23,7 +24,10 @@ class TechnomarinScraper():
     def __init__(self):
         """ Scraper initializations"""
         # logger.info('Init SCR')
-        pass
+        try:
+            logger.info('Last update on {}'.format(self.__readFile__(OUTPUT_REPORT).get('lastUpdate', '')))
+        except FileNotFoundError:
+            logger.info('No previous updates found')
 
     def __writeFile__(self, file, data):
         """ Write data to a file """
@@ -39,6 +43,8 @@ class TechnomarinScraper():
         """ Fetch page content(DOM tree) """
         try:
             return html.fromstring(urlopen(url).read())
+        except KeyboardInterrupt:
+            return None
         except HTTPError as error:
             logger.error('The server couldn\'t fulfill the request. Error code: {}'.format(error.code))
             sys.exit(1)
@@ -50,6 +56,18 @@ class TechnomarinScraper():
         except:
             logger.exception('¯\\_(ツ)_/¯')
             sys.exit(1)
+
+    def __getProductInfo__(self, product_page):
+        """ Return information from the product page """
+        title = product_page.xpath('.//div[@class="tm-product-name-container"]/a')[0]
+        return {
+            'code':     product_page.xpath('.//div[@class="tm-product-description-container"]//p/text()')[0].split(': ')[1],
+            'name':     title.get('title'),
+            'url':      title.get('href'),
+            'image':    product_page.xpath('.//div[@class="img-container"]/img[1]/@src')[0],
+            'price':    float(re.sub('[^0-9]', '', product_page.xpath('.//span[contains(@class, "general-price")]/text()')[0])) / 100,
+            'in_stock': True if len(product_page.xpath('.//span[@class="goods-available"]')) > 0 else False
+        }
 
     @logging_decorator
     def getManufacturers(self):
@@ -78,10 +96,10 @@ class TechnomarinScraper():
             manufacturers = self.getManufacturers()
 
         logger.info('Getting goods')
-        goods         = {}
-        numberOfGoods = 0
-        numberOfManuf = len(manufacturers.keys())
-        current_manuf = 0
+        goods           = {}
+        number_of_goods = 0
+        number_of_manuf = len(manufacturers.keys())
+        current_manuf   = 0
 
         # Parse information
         for name, url in manufacturers.items():
@@ -89,42 +107,39 @@ class TechnomarinScraper():
             current_page   = 0
             goods[name]    = []
 
-            progress_bar(numberOfManuf, current_manuf)
+            progress_bar(number_of_manuf, current_manuf)
 
             while True:
                 current_page += 1
                 DOM = self.__getHTML__('{}&limit=100&page={}'.format(url, current_page))
+
+                # Catch user interrupt
+                if DOM is None: break
+
                 products = DOM.xpath('//div[contains(@class, "tm-product-container")]')
 
                 if len(products) == 0: break
-                for p in products:
-                    numberOfGoods += 1
-                    title = p.xpath('.//div[@class="tm-product-name-container"]/a')[0]
-                    product = {
-                        'code':     p.xpath('.//div[@class="tm-product-description-container"]//p/text()')[0].split(': ')[1],
-                        'name':     title.get('title'),
-                        'url':      title.get('href'),
-                        'image':    p.xpath('.//div[@class="img-container"]/img[1]/@src')[0],
-                        'price':    float(p.xpath('.//span[contains(@class, "general-price")]/text()')[0].strip().split(' ')[0]),
-                        'in_stock': True if len(p.xpath('.//span[@class="goods-available"]')) > 0 else False
-                    }
 
-                    goods[name].append(product)
+                for product in products:
+                    number_of_goods += 1
+                    goods[name].append(self.__getProductInfo__(product))
 
+            # Catch user interrupt
+            if DOM is None: break
 
         sys.stdout.write('\n')
-        logger.info('{} entries were received'.format(numberOfGoods))
+        logger.info('{} entries were received'.format(number_of_goods))
         self.__writeFile__(OUTPUT_GOODS, goods)
-        self.report(numberOfManuf, numberOfGoods)
+        self.report(number_of_manuf, number_of_goods)
         return goods
 
     @logging_decorator
-    def report(self, numberOfManuf=None, numberOfGoods=None):
+    def report(self, number_of_manuf=None, number_of_goods=None):
         """ Write general information on manufacturers and their products """
         logger.info('Creating report')
         report = {
-            'numberOfManufacturers': numberOfManuf,
-            'numberOfGoods':         numberOfGoods,
+            'number_of_manufacturers': number_of_manuf,
+            'number_of_goods':         number_of_goods,
             'lastUpdate':            datetime.now().strftime('%d-%m-%Y %H:%M:%S')
         }
         self.__writeFile__(OUTPUT_REPORT, report)
