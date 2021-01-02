@@ -40,6 +40,8 @@ class TechnomarinScraper():
         """ Fetch page content(DOM tree) """
         try:
             return html.fromstring(urlopen(url).read())
+        except KeyboardInterrupt:
+            return None
         except HTTPError as error:
             logger.error('The server couldn\'t fulfill the request. Error code: {}'.format(error.code))
             sys.exit(1)
@@ -107,6 +109,10 @@ class TechnomarinScraper():
             while True:
                 current_page += 1
                 DOM = self.__getHTML__('{}&limit=100&page={}'.format(url, current_page))
+
+                # Catch user interrupt
+                if DOM is None: break
+
                 products = DOM.xpath('//div[contains(@class, "tm-product-container")]')
 
                 if len(products) == 0: break
@@ -114,6 +120,9 @@ class TechnomarinScraper():
                 for product in products:
                     number_of_goods += 1
                     goods[name].append(self.__getProductInfo__(product))
+
+            # Catch user interrupt
+            if DOM is None: break
 
         sys.stdout.write('\n')
         logger.info('{} entries were received'.format(number_of_goods))
