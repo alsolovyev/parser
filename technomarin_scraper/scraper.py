@@ -15,6 +15,7 @@ try:
 except ImportError:
     from urllib2        import urlopen, URLError, HTTPError
 
+
 class TechnomarinScraper():
     """
     Receive and parse information on manufacturers
@@ -23,7 +24,6 @@ class TechnomarinScraper():
 
     def __init__(self):
         """ Scraper initializations"""
-        # logger.info('Init SCR')
         try:
             logger.info('Last update on {}'.format(self.__readFile__(OUTPUT_REPORT).get('lastUpdate', '')))
         except FileNotFoundError:
@@ -140,7 +140,7 @@ class TechnomarinScraper():
         report = {
             'number_of_manufacturers': number_of_manuf,
             'number_of_goods':         number_of_goods,
-            'lastUpdate':            datetime.now().strftime('%d-%m-%Y %H:%M:%S')
+            'lastUpdate':              datetime.now().strftime('%d-%m-%Y %H:%M:%S')
         }
         self.__writeFile__(OUTPUT_REPORT, report)
         logger.info('Report was created')
